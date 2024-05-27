@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">RandomFoodGood</string>
+    <string name="google_client_id">319251045430-6tf9eg0c49suc188a2eg68n4mvngj0e2.apps.googleusercontent.com</string>
+    <string name="kakao_native_key">aa5efd11f1b3e111c6c19d3754250335</string>
+    <string name="kakao_native_key_manifest">kakaoaa5efd11f1b3e111c6c19d3754250335</string>
+
+    <string name="naver_client_id">2sCQsii_OlI6d0P7GfMk</string>
+    <string name="naver_client_secret">5sd3GnM1Dr</string>
+</resources>

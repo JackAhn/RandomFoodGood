@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "598580695787",
+    "project_id": "randomfoodgood-popup",
+    "storage_bucket": "randomfoodgood-popup.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:598580695787:android:c059af1546d3f03c0e24ae",
+        "android_client_info": {
+          "package_name": "com.jackahn.randomfoodgood"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyeUktvYsAMBgX5ITNfEsRhJw9pFdjvv8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
