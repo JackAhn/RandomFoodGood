@@ -1,5 +1,6 @@
-package com.jackahn.randomfoodgood
+package com.jackahn.randomfoodgood.view.login
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -12,7 +13,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.jackahn.randomfoodgood.R
+import com.jackahn.randomfoodgood.dao.User
 import com.jackahn.randomfoodgood.databinding.ActivityLoginBinding
+import com.jackahn.randomfoodgood.dto.LoginDto
+import com.jackahn.randomfoodgood.util.RetrofitUtil
+import com.jackahn.randomfoodgood.view.main.MainActivity
 import com.kakao.sdk.auth.AuthApiClient
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.AuthErrorCause
@@ -23,10 +29,15 @@ import com.navercorp.nid.oauth.NidOAuthLogin
 import com.navercorp.nid.oauth.OAuthLoginCallback
 import com.navercorp.nid.profile.NidProfileCallback
 import com.navercorp.nid.profile.data.NidProfileResponse
+import retrofit2.Call
+import retrofit2.Response
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
+
+    //최초 로그인 확인 변수
+    private var isFirst = true
 
     //Google 로그인
     private lateinit var googleSignInClient: GoogleSignInClient
@@ -36,10 +47,9 @@ class LoginActivity : AppCompatActivity() {
         try {
             val account = task.getResult(ApiException::class.java)
 
-            // 유저 정보 불러오기 + API 서버에 저장
-            val id = account.account
-            val name = account.familyName + account.givenName
-
+            // 구글 회원 가입
+            val id = account.account.toString()
+            createUser(id, 1)
 
         } catch (e: ApiException) {
             Log.e(LoginActivity::class.java.simpleName, e.stackTraceToString())
@@ -58,14 +68,17 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.googleLoginBtn.setOnClickListener{
+            isFirst = false
             requestGoogleLogin()
         }
 
         binding.kakaoLoginBtn.setOnClickListener {
+            isFirst = false
             requestKakaoLogin()
         }
 
         binding.naverLoginBtn.setOnClickListener {
+            isFirst = false
             requestNaverLogin()
         }
 
@@ -141,14 +154,22 @@ class LoginActivity : AppCompatActivity() {
                 // 네이버 로그인 인증이 성공했을 때 수행할 코드 추가
                 val profile = response.profile
                 if(profile != null){
-                    val email = profile.email
+                    val email = profile.email.toString()
+                    if(isFirst)
+                        getUserData(email, 3)
+                    else
+                        createUser(email, 3)
                     Toast.makeText(applicationContext, "네이버 이메일 : " + email, Toast.LENGTH_SHORT).show()
                 }
             }
             override fun onFailure(httpStatus: Int, message: String) {
                 val errorCode = NaverIdLoginSDK.getLastErrorCode().code
                 val errorDescription = NaverIdLoginSDK.getLastErrorDescription()
-                Toast.makeText(applicationContext,"errorCode:$errorCode, errorDesc:$errorDescription",Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    applicationContext,
+                    "errorCode:$errorCode, errorDesc:$errorDescription",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             override fun onError(errorCode: Int, message: String) {
                 onFailure(errorCode, message)
@@ -163,8 +184,10 @@ class LoginActivity : AppCompatActivity() {
             override fun onFailure(httpStatus: Int, message: String) {
                 val errorCode = NaverIdLoginSDK.getLastErrorCode().code
                 val errorDescription = NaverIdLoginSDK.getLastErrorDescription()
-                Toast.makeText(this@LoginActivity, "errorCode: ${errorCode}\n" +
-                        "errorDescription: ${errorDescription}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@LoginActivity, "errorCode: ${errorCode}\n" +
+                            "errorDescription: ${errorDescription}", Toast.LENGTH_SHORT
+                ).show()
             }
             override fun onError(errorCode: Int, message: String) {
                 onFailure(errorCode, message)
@@ -179,13 +202,15 @@ class LoginActivity : AppCompatActivity() {
         val gsa = GoogleSignIn.getLastSignedInAccount(this)
         if(gsa != null){
             //로그인 성공
-            val id = gsa.account
+            val id = gsa.account.toString()
+            getUserData(id, 1)
         }
 
         // 카카오 로그인 검사
         if (AuthApiClient.instance.hasToken()) {
             UserApiClient.instance.accessTokenInfo { tokenInfo, error ->
                 if (error == null) {
+                    // 로그인 성공
                     getKakaoUserInfo()
                 }
                 else {
@@ -208,12 +233,79 @@ class LoginActivity : AppCompatActivity() {
                 Log.e("KakaoLogin", "사용자 정보 요청 실패", error)
             }
             else if (user != null) {
-                Log.i("KakaoLogin", "사용자 정보 요청 성공" +
-                        "\n회원번호: ${user.id}" +
-                        "\n이메일: ${user.kakaoAccount?.email}" +
-                        "\n닉네임: ${user.kakaoAccount?.profile?.nickname}" +
-                        "\n프로필사진: ${user.kakaoAccount?.profile?.thumbnailImageUrl}")
+                Log.i(
+                    "KakaoLogin", "사용자 정보 요청 성공" +
+                            "\n회원번호: ${user.id}" +
+                            "\n이메일: ${user.kakaoAccount?.email}" +
+                            "\n닉네임: ${user.kakaoAccount?.profile?.nickname}" +
+                            "\n프로필사진: ${user.kakaoAccount?.profile?.thumbnailImageUrl}"
+                )
+                val id = user.kakaoAccount?.email.toString()
+                if(isFirst) {
+                    getUserData(id, 2)
+                }
+                else {
+                    //회원가입 시도
+                    Log.i("Kakao", "카카오 회원가입 시도")
+                    createUser(id, 2)
+                }
             }
         }
+    }
+
+    private fun getUserData(id: String, socialId: Int){
+        var input = LoginDto()
+        input.userId = id
+
+        RetrofitUtil.userUtil.checkLogin(input).enqueue(object: retrofit2.Callback<User> {
+            override fun onResponse(call: Call<User>, response: Response<User>) {
+                isFirst = false
+                val value = response.body()
+
+                if(value != null){
+                    val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                }
+                else {
+                    // 회원가입 시도
+                    createUser(id, socialId)
+                }
+            }
+            override fun onFailure(call: Call<User>, t: Throwable) {
+                Log.e("Retrofit", t.localizedMessage!!)
+            }
+        })
+    }
+
+    private fun createUser(id: String, socialId: Int){
+        val input = User()
+        input.id  = 0
+        input.userId = id
+        input.socialId = socialId
+        input.userName = "테스트" // 추후 입력창 제작
+
+        RetrofitUtil.userUtil.addUser(input).enqueue(object : retrofit2.Callback<User> {
+            override fun onResponse(call: Call<User>, response: Response<User>) {
+                val value = response.body()
+
+                if(value != null) {
+                    Toast.makeText(this@LoginActivity, "회원가입 성공", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                }
+                else {
+                    Toast.makeText(this@LoginActivity, response.message(), Toast.LENGTH_SHORT).show()
+
+                }
+
+            }
+
+            override fun onFailure(call: Call<User>, t: Throwable) {
+                Log.e("Retrofit", t.localizedMessage!!)
+                Toast.makeText(this@LoginActivity, t.localizedMessage!!, Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }

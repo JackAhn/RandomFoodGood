@@ -1,4 +1,4 @@
-package com.jackahn.randomfoodgood
+package com.jackahn.randomfoodgood.view
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,6 +8,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.jackahn.randomfoodgood.R
+import com.jackahn.randomfoodgood.view.login.LoginActivity
 import com.kakao.sdk.common.KakaoSdk
 import com.navercorp.nid.NaverIdLoginSDK
 
