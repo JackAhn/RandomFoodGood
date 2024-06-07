@@ -3,6 +3,7 @@ package com.jackahn.randomfoodgood.view.main.home
 import android.Manifest
 import android.content.Context
 import android.content.Context.LOCATION_SERVICE
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
@@ -13,15 +14,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.jackahn.randomfoodgood.R
-import com.jackahn.randomfoodgood.dao.Place
+import com.jackahn.randomfoodgood.dao.OnDataPass
 import com.jackahn.randomfoodgood.dao.PlaceResult
 import com.jackahn.randomfoodgood.dao.ResultSearchKeyword
 import com.jackahn.randomfoodgood.databinding.FragmentHomeBinding
@@ -36,11 +33,11 @@ import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
-import kotlin.streams.toList
 
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
+    lateinit var dataPasser: OnDataPass
 
     private var mLocationManager: LocationManager? = null
     private var locationListener = object : LocationListener {
@@ -56,7 +53,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     companion object {
         const val BASE_URL = "https://dapi.kakao.com/"
-        const val API_KEY = "KakaoAK 377c3dd018b17885357d72c0852114cd"  // REST API 키
+        const val API_KEY = "KakaoAK 377c3dd018b17885357d72c0852114cd"  // 카카오 REST API 키
         const val R = 6372.8 * 1000
     }
 
@@ -90,6 +87,7 @@ class HomeFragment : Fragment() {
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             mLocationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 10.0f, locationListener)
+
             val location: Location? = mLocationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
             location?.let{
                 val latitude = location.latitude
@@ -120,13 +118,18 @@ class HomeFragment : Fragment() {
                 Log.d("Kakao-Result", "Raw: ${response.raw()}")
                 Log.d("Kakao-Result", "Body: ${response.body()}")
 
-                val body = response.body()!!.documents
+                var body = response.body()!!.documents
+                body = body.sortedBy {
+                    getDistance(lat, lng, it.y.toDouble(), it.x.toDouble())
+                }.toList()
                 result.clear()
 
                 body.forEach {
                     result.add(PlaceResult(it.place_name, it.road_address_name,
-                        getDistance(lat, lng, it.y.toDouble(), it.x.toDouble()).toString() + "m"))
+                        (getDistance(lat, lng, it.y.toDouble(), it.x.toDouble()).toString() + "m"), it.phone, it.place_url))
                 }
+
+                passData(result)
 
                 adapter!!.notifyDataSetChanged()
             }
@@ -147,6 +150,15 @@ class HomeFragment : Fragment() {
         return (HomeFragment.R * c).toInt()
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        dataPasser = context as OnDataPass
+    }
+
+    fun passData(data: ArrayList<PlaceResult>){
+        dataPasser.onDataPass(data)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -160,7 +172,6 @@ class HomeFragment : Fragment() {
             val distanceText = itemView.findViewById<TextView>(com.jackahn.randomfoodgood.R.id.foodDistance)
         }
 
-
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BoardViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(com.jackahn.randomfoodgood.R.layout.food_detail, parent, false)
             return BoardViewHolder(view)
@@ -170,6 +181,12 @@ class HomeFragment : Fragment() {
             holder.titleText.text = itemList[position].place_name
             holder.placeText.text = itemList[position].road_address_name
             holder.distanceText.text = itemList[position].distance
+
+            holder.itemView.setOnClickListener {
+                val intent = Intent(it.context, DetailFoodActivity::class.java)
+                intent.putExtra("food", itemList[position])
+                it.context.startActivity(intent)
+            }
         }
 
         override fun getItemCount(): Int {

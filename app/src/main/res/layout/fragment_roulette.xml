@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="16dp"
+    tools:context=".view.main.roulette.RouletteFragment">
+
+    <Button
+        android:id="@+id/startRouletteBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="룰렛 돌리기"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/rouletteText1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="40dp"
+        android:text="결과는...!"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/roulettePlaceText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="TextView"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="@+id/rouletteText1"
+        app:layout_constraintTop_toBottomOf="@+id/rouletteText1" />
+
+    <TextView
+        android:id="@+id/rouletteText2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="입니다 축하합니다!"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="@+id/roulettePlaceText"
+        app:layout_constraintTop_toBottomOf="@+id/roulettePlaceText" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginBottom="36dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/sample_map"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/rouletteAddrText"
+        app:layout_constraintEnd_toEndOf="@+id/rouletteShareBtn"
+        app:layout_constraintStart_toStartOf="@+id/rouletteShareBtn"
+        app:layout_constraintTop_toBottomOf="@+id/rouletteText2"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/rouletteAddrText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="36dp"
+        android:text="TextView"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/rouletteShareBtn"
+        app:layout_constraintEnd_toEndOf="@+id/rouletteShareBtn"
+        app:layout_constraintStart_toStartOf="@+id/rouletteShareBtn" />
+
+    <Button
+        android:id="@+id/rouletteShareBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:text="공유하기"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/rouletteResetBtn"
+        app:layout_constraintEnd_toEndOf="@+id/rouletteResetBtn"
+        app:layout_constraintStart_toStartOf="@+id/rouletteResetBtn" />
+
+    <Button
+        android:id="@+id/rouletteResetBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="40dp"
+        android:text="다시 돌리기"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

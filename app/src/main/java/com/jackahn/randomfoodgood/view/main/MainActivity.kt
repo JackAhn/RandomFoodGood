@@ -8,11 +8,14 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.jackahn.randomfoodgood.R
+import com.jackahn.randomfoodgood.dao.OnDataPass
+import com.jackahn.randomfoodgood.dao.PlaceResult
 import com.jackahn.randomfoodgood.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OnDataPass {
 
     private lateinit var binding: ActivityMainBinding
+    private var result = ArrayList<PlaceResult>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,5 +31,13 @@ class MainActivity : AppCompatActivity() {
 
 //        setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+    }
+
+    override fun onDataPass(data: ArrayList<PlaceResult>) {
+        result = data
+    }
+
+    fun getResult(): ArrayList<PlaceResult>{
+        return result
     }
 }

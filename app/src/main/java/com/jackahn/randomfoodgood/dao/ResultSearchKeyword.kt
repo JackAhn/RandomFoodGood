@@ -11,4 +11,6 @@ data class Place(
     var road_address_name: String,      // 도로명 주소
     var x: String,                      // X 좌표값, longitude
     var y: String,                      // Y 좌표값, latitude
+    var phone: String,                  // 전화번호
+    var place_url: String               // 카카오맵 위치 정보 URL
 )

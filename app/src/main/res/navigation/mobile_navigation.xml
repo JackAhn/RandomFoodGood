@@ -13,13 +13,13 @@
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="com.jackahn.randomfoodgood.view.main.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:name="com.jackahn.randomfoodgood.view.main.roulette.RouletteFragment"
+        android:label="@string/title_roulette"
+        tools:layout="@layout/fragment_roulette" />
 
     <fragment
         android:id="@+id/navigation_notifications"
         android:name="com.jackahn.randomfoodgood.view.main.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
+        android:label="@string/title_mypage"
         tools:layout="@layout/fragment_notifications" />
 </navigation>
