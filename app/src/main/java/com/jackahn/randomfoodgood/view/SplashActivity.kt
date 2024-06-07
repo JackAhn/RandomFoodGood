@@ -1,17 +1,23 @@
 package com.jackahn.randomfoodgood.view
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.jackahn.randomfoodgood.R
 import com.jackahn.randomfoodgood.view.login.LoginActivity
 import com.kakao.sdk.common.KakaoSdk
 import com.navercorp.nid.NaverIdLoginSDK
+
 
 class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,6 +30,57 @@ class SplashActivity : AppCompatActivity() {
             insets
         }
 
+        // GPS 권한 설정
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+            && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf<String>(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ), 100
+            )
+        }
+        else {
+            initData()
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == 100) {
+            // 권한 요청
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                Toast.makeText(this, "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            else {
+                initData()
+            }
+        }
+    }
+
+    fun initData(){
         // 카카오 API 설정을 위한 Hash값 불러오기 (최초 1회만)
 //        val keyHash = Utility.getKeyHash(this)
 //        Log.d("Hash", keyHash)
@@ -41,4 +98,5 @@ class SplashActivity : AppCompatActivity() {
             finish()
         }, 2000)
     }
+
 }
