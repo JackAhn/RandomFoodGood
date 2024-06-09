@@ -47,7 +47,7 @@ class LoginActivity : AppCompatActivity() {
             // 구글 회원 가입
             val id = account.email.toString()
             val name = account.displayName.toString()
-            createUser(id, name, 1)
+            getUserData(id, name, 1)
 
         } catch (e: ApiException) {
             Log.e(LoginActivity::class.java.simpleName, e.stackTraceToString())
@@ -162,11 +162,7 @@ class LoginActivity : AppCompatActivity() {
             override fun onFailure(httpStatus: Int, message: String) {
                 val errorCode = NaverIdLoginSDK.getLastErrorCode().code
                 val errorDescription = NaverIdLoginSDK.getLastErrorDescription()
-                Toast.makeText(
-                    applicationContext,
-                    "errorCode:$errorCode, errorDesc:$errorDescription",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Log.d("Naver-Login", "errorCode:$errorCode, errorDesc:$errorDescription")
             }
             override fun onError(errorCode: Int, message: String) {
                 onFailure(errorCode, message)
@@ -181,10 +177,7 @@ class LoginActivity : AppCompatActivity() {
             override fun onFailure(httpStatus: Int, message: String) {
                 val errorCode = NaverIdLoginSDK.getLastErrorCode().code
                 val errorDescription = NaverIdLoginSDK.getLastErrorDescription()
-                Toast.makeText(
-                    this@LoginActivity, "errorCode: ${errorCode}\n" +
-                            "errorDescription: ${errorDescription}", Toast.LENGTH_SHORT
-                ).show()
+                Log.d("Naver-Login", "errorCode:$errorCode, errorDesc:$errorDescription")
             }
             override fun onError(errorCode: Int, message: String) {
                 onFailure(errorCode, message)
@@ -301,7 +294,7 @@ class LoginActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<User>, t: Throwable) {
                 Log.e("Retrofit", t.localizedMessage!!)
-                Toast.makeText(this@LoginActivity, t.localizedMessage!!, Toast.LENGTH_SHORT).show()
+//                Toast.makeText(this@LoginActivity, t.localizedMessage!!, Toast.LENGTH_SHORT).show()
             }
         })
     }

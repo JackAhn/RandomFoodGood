@@ -72,7 +72,6 @@ class RouletteFragment : Fragment() {
         binding.rouletteText2.visibility = View.INVISIBLE
         binding.rouletteShareBtn.visibility = View.INVISIBLE
         binding.rouletteResetBtn.visibility = View.INVISIBLE
-        binding.imageView2.visibility = View.INVISIBLE
         binding.rouletteAddrText.visibility = View.INVISIBLE
 
         binding.startRouletteBtn.visibility = View.VISIBLE
@@ -85,8 +84,6 @@ class RouletteFragment : Fragment() {
         binding.rouletteText2.visibility = View.VISIBLE
         binding.rouletteShareBtn.visibility = View.VISIBLE
         binding.rouletteResetBtn.visibility = View.VISIBLE
-        binding.imageView2.visibility = View.VISIBLE
-        binding.imageView2.visibility = View.VISIBLE
         binding.rouletteAddrText.visibility = View.VISIBLE
 
         binding.startRouletteBtn.visibility = View.INVISIBLE

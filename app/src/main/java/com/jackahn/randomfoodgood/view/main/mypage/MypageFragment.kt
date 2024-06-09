@@ -51,6 +51,7 @@ class MypageFragment : Fragment() {
         user = (requireActivity() as MainActivity).getUser()
 
         binding.myPageNameText.text = user.userName + "님의 마이페이지"
+        binding.myPageEmailText.text = user.userId
 
         Log.i("mypage-socialid", "SocialId : " + user.socialId)
 

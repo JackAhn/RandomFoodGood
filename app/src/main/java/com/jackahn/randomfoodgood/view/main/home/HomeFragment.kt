@@ -23,6 +23,7 @@ import com.jackahn.randomfoodgood.dao.PlaceResult
 import com.jackahn.randomfoodgood.dao.ResultSearchKeyword
 import com.jackahn.randomfoodgood.databinding.FragmentHomeBinding
 import com.jackahn.randomfoodgood.service.KakaoService
+import com.jackahn.randomfoodgood.view.main.MainActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -33,6 +34,7 @@ import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
+import kotlin.streams.toList
 
 class HomeFragment : Fragment() {
 
@@ -73,28 +75,61 @@ class HomeFragment : Fragment() {
         binding.searchList.adapter = adapter
         binding.searchList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
+        binding.searchFoodBtn.setOnClickListener {
+            if(binding.searchText.text!!.toString().trim().equals("")){
+                passData(result)
+
+                adapter = BoardAdapter(result)
+                binding.searchList.adapter = adapter
+            }
+            else{
+                val filterResult = ArrayList<PlaceResult>()
+
+                result.forEach {
+                    if(it.place_name.contains(binding.searchText.text!!.toString()))
+                        filterResult.add(it)
+                }
+
+                passData(filterResult)
+
+                adapter = BoardAdapter(filterResult)
+                binding.searchList.adapter = adapter
+            }
+
+            adapter!!.notifyDataSetChanged()
+        }
         return root
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-            && ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            mLocationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 10.0f, locationListener)
 
-            val location: Location? = mLocationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-            location?.let{
-                val latitude = location.latitude
-                val longitude = location.longitude
+        if(result.isEmpty()){
+            if (ActivityCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                mLocationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 10.0f, locationListener)
 
-                searchFoodData(latitude, longitude)
+                val location: Location? = mLocationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                location?.let{
+                    val latitude = location.latitude
+                    val longitude = location.longitude
+
+                    searchFoodData(latitude, longitude)
+                }
             }
+        }
+        else{
+            val recentData = (requireActivity() as MainActivity).getResult()
+            adapter = BoardAdapter(recentData)
+            binding.searchList.adapter = adapter
+            adapter!!.notifyDataSetChanged()
         }
     }
 
@@ -128,10 +163,9 @@ class HomeFragment : Fragment() {
                     result.add(PlaceResult(it.place_name, it.road_address_name,
                         (getDistance(lat, lng, it.y.toDouble(), it.x.toDouble()).toString() + "m"), it.phone, it.place_url))
                 }
-
                 passData(result)
-
                 adapter!!.notifyDataSetChanged()
+                binding.searchText.setText("")
             }
 
             override fun onFailure(call: Call<ResultSearchKeyword>, t: Throwable) {
@@ -161,6 +195,7 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mLocationManager!!.removeUpdates(locationListener)
         _binding = null
     }
 
