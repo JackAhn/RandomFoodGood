@@ -19,6 +19,9 @@ interface HistoryService {
     @POST("api/history")
     fun addHistory(@Body histoy: HistoryDto): Call<History>
 
-    @GET("api/history/{id}")
-    fun getHistory(@Path("id")id: Int): Call<List<History>>
+    @GET("api/history/{userId}")
+    fun getHistory(@Path("userId")id: Int): Call<List<History>>
+
+    @DELETE("api/history/{userId}")
+    fun deleteHistory(@Path("userId") userId: Long): Call<Int>
 }

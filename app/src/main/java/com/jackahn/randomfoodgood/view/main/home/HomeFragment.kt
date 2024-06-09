@@ -222,6 +222,21 @@ class HomeFragment : Fragment() {
                 intent.putExtra("food", itemList[position])
                 it.context.startActivity(intent)
             }
+            holder.titleText.setOnClickListener {
+                val intent = Intent(it.context, DetailFoodActivity::class.java)
+                intent.putExtra("food", itemList[position])
+                it.context.startActivity(intent)
+            }
+            holder.placeText.setOnClickListener {
+                val intent = Intent(it.context, DetailFoodActivity::class.java)
+                intent.putExtra("food", itemList[position])
+                it.context.startActivity(intent)
+            }
+            holder.distanceText.setOnClickListener {
+                val intent = Intent(it.context, DetailFoodActivity::class.java)
+                intent.putExtra("food", itemList[position])
+                it.context.startActivity(intent)
+            }
         }
 
         override fun getItemCount(): Int {

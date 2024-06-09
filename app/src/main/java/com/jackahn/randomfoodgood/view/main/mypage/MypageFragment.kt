@@ -122,7 +122,22 @@ class MypageFragment : Fragment() {
         }
     }
 
-    private fun requestDelete(){
+    private fun requestDelete() {
+        RetrofitUtil.historyUtil.deleteHistory(user.id!!.toLong()).enqueue(object: Callback<Int>{
+            override fun onResponse(call: Call<Int>, response: Response<Int>) {
+                if(response.body() != null){
+                    deleteUser()
+                }
+            }
+
+            override fun onFailure(call: Call<Int>, t: Throwable) {
+                Toast.makeText(requireContext(), t.localizedMessage, Toast.LENGTH_SHORT).show()
+            }
+
+        })
+    }
+
+    private fun deleteUser(){
         RetrofitUtil.userUtil.deleteUser(user.id!!.toLong()).enqueue(object: Callback<Int>{
             override fun onResponse(call: Call<Int>, response: Response<Int>) {
                 if(response.body()!! == 1){
