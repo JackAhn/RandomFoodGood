@@ -1,5 +1,6 @@
 package com.jackahn.randomfoodgood.util
 
+import com.jackahn.randomfoodgood.service.HistoryService
 import com.jackahn.randomfoodgood.service.UserService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -10,4 +11,10 @@ object RetrofitUtil {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(UserService::class.java)
+
+    var historyUtil = Retrofit.Builder()
+        .baseUrl("http://10.0.2.2:8080/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(HistoryService::class.java)
 }

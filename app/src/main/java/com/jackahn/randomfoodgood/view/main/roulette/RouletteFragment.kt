@@ -7,11 +7,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.jackahn.randomfoodgood.dao.History
 import com.jackahn.randomfoodgood.dao.PlaceResult
 import com.jackahn.randomfoodgood.databinding.FragmentRouletteBinding
+import com.jackahn.randomfoodgood.dto.HistoryDto
+import com.jackahn.randomfoodgood.util.RetrofitUtil
 import com.jackahn.randomfoodgood.view.main.MainActivity
 import com.jackahn.randomfoodgood.view.main.home.DetailFoodActivity
 import kotlinx.coroutines.selects.select
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Random
 
 class RouletteFragment : Fragment() {
@@ -100,6 +108,22 @@ class RouletteFragment : Fragment() {
             val shareIntent = Intent.createChooser(textIntent, "공유하기")
             startActivity(shareIntent)
         }
+
+        // History 데이터 저장
+        val user = (requireActivity() as MainActivity).getUser()
+        var history = HistoryDto(0, user.id!!, selected.place_name, selected.road_address_name,
+            selected.phone, SimpleDateFormat("yyyy-MM-dd").format(Date()))
+
+        RetrofitUtil.historyUtil.addHistory(history).enqueue(object: Callback<History>{
+            override fun onResponse(call: Call<History>, response: Response<History>) {
+                // 데이터 전달 성공
+            }
+
+            override fun onFailure(call: Call<History>, t: Throwable) {
+                Toast.makeText(requireContext(), t.localizedMessage, Toast.LENGTH_SHORT).show()
+            }
+
+        })
     }
 
     override fun onDestroyView() {
