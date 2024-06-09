@@ -65,6 +65,12 @@ class LoginActivity : AppCompatActivity() {
             insets
         }
 
+        // 구글 클라이언트 초기화
+        val googleSignInOption = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .build()
+        SNSUtil.googleSignInClient = GoogleSignIn.getClient(this, googleSignInOption)
+
         // 구글 로그인 요청
         binding.googleLoginBtn.setOnClickListener{
             requestGoogleLogin()
@@ -86,12 +92,6 @@ class LoginActivity : AppCompatActivity() {
 
     // 구글 로그인 요청
     private fun requestGoogleLogin() {
-        // 구글 클라이언트 초기화
-        val googleSignInOption = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .build()
-        SNSUtil.googleSignInClient = GoogleSignIn.getClient(this, googleSignInOption)
-
         val signInIntent = SNSUtil.googleSignInClient.signInIntent
         googleAuthLauncher.launch(signInIntent)
     }
