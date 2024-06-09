@@ -23,18 +23,23 @@
         <activity
             android:name=".view.main.MainActivity"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".view.login.LoginActivity"
             android:exported="true" />
         <activity
             android:name=".view.SplashActivity"
-            android:exported="true"></activity> <!-- Kakao 로그인 -->
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
+        <!-- Kakao 로그인 -->
         <activity
             android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
             android:exported="true">
@@ -50,6 +55,7 @@
                     android:scheme="@string/kakao_native_key_manifest" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

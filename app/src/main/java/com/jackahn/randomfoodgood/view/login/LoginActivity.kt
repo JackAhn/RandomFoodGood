@@ -18,6 +18,7 @@ import com.jackahn.randomfoodgood.dao.User
 import com.jackahn.randomfoodgood.databinding.ActivityLoginBinding
 import com.jackahn.randomfoodgood.dto.LoginDto
 import com.jackahn.randomfoodgood.util.RetrofitUtil
+import com.jackahn.randomfoodgood.util.SNSUtil
 import com.jackahn.randomfoodgood.view.main.MainActivity
 import com.kakao.sdk.auth.AuthApiClient
 import com.kakao.sdk.auth.model.OAuthToken
@@ -36,11 +37,7 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
 
-    //최초 로그인 확인 변수
-    private var isFirst = true
-
     //Google 로그인
-    private lateinit var googleSignInClient: GoogleSignInClient
     private val googleAuthLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
 
@@ -48,8 +45,9 @@ class LoginActivity : AppCompatActivity() {
             val account = task.getResult(ApiException::class.java)
 
             // 구글 회원 가입
-            val id = account.account.toString()
-            createUser(id, 1)
+            val id = account.email.toString()
+            val name = account.displayName.toString()
+            createUser(id, name, 1)
 
         } catch (e: ApiException) {
             Log.e(LoginActivity::class.java.simpleName, e.stackTraceToString())
@@ -67,21 +65,22 @@ class LoginActivity : AppCompatActivity() {
             insets
         }
 
+        // 구글 로그인 요청
         binding.googleLoginBtn.setOnClickListener{
-            isFirst = false
             requestGoogleLogin()
         }
 
+        // 카카오 로그인 요청
         binding.kakaoLoginBtn.setOnClickListener {
-            isFirst = false
             requestKakaoLogin()
         }
 
+        // 네이버 로그인 요청
         binding.naverLoginBtn.setOnClickListener {
-            isFirst = false
             requestNaverLogin()
         }
 
+        // 최근 로그인 기록 확인
         checkRecentLogin()
     }
 
@@ -91,9 +90,9 @@ class LoginActivity : AppCompatActivity() {
         val googleSignInOption = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
             .build()
-        googleSignInClient = GoogleSignIn.getClient(this, googleSignInOption)
+        SNSUtil.googleSignInClient = GoogleSignIn.getClient(this, googleSignInOption)
 
-        val signInIntent = googleSignInClient.signInIntent
+        val signInIntent = SNSUtil.googleSignInClient.signInIntent
         googleAuthLauncher.launch(signInIntent)
     }
 
@@ -155,11 +154,9 @@ class LoginActivity : AppCompatActivity() {
                 val profile = response.profile
                 if(profile != null){
                     val email = profile.email.toString()
-                    if(isFirst)
-                        getUserData(email, 3)
-                    else
-                        createUser(email, 3)
-                    Toast.makeText(applicationContext, "네이버 이메일 : " + email, Toast.LENGTH_SHORT).show()
+                    val name = profile.nickname.toString()
+                    Log.i("login-naver", "이메일 : " + email + " / 닉네임 : " + name)
+                    getUserData(email, name, 3)
                 }
             }
             override fun onFailure(httpStatus: Int, message: String) {
@@ -202,12 +199,12 @@ class LoginActivity : AppCompatActivity() {
         val gsa = GoogleSignIn.getLastSignedInAccount(this)
         if(gsa != null){
             //로그인 성공
-            val id = gsa.account.toString()
-            getUserData(id, 1)
+            val id = gsa.email.toString()
+            val name = gsa.displayName.toString()
+            getUserData(id, name, 1)
         }
-
         // 카카오 로그인 검사
-        if (AuthApiClient.instance.hasToken()) {
+        else if (AuthApiClient.instance.hasToken()) {
             UserApiClient.instance.accessTokenInfo { tokenInfo, error ->
                 if (error == null) {
                     // 로그인 성공
@@ -241,35 +238,32 @@ class LoginActivity : AppCompatActivity() {
                             "\n프로필사진: ${user.kakaoAccount?.profile?.thumbnailImageUrl}"
                 )
                 val id = user.kakaoAccount?.email.toString()
-                if(isFirst) {
-                    getUserData(id, 2)
-                }
-                else {
-                    //회원가입 시도
-                    Log.i("Kakao", "카카오 회원가입 시도")
-                    createUser(id, 2)
-                }
+                val name = user.kakaoAccount?.profile?.nickname.toString()
+                getUserData(id, name, 2)
             }
         }
     }
 
-    private fun getUserData(id: String, socialId: Int){
+
+    // 유저 데이터 불러오기
+    private fun getUserData(id: String, name: String, socialId: Int){
         var input = LoginDto()
         input.userId = id
 
         RetrofitUtil.userUtil.checkLogin(input).enqueue(object: retrofit2.Callback<User> {
             override fun onResponse(call: Call<User>, response: Response<User>) {
-                isFirst = false
-                val value = response.body()
-
-                if(value != null){
+                val value = response.body()!!
+                Log.i("login-result", value.toString())
+                if(value.id != null){
                     val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                    intent.putExtra("user", value)
                     startActivity(intent)
                     finish()
                 }
                 else {
                     // 회원가입 시도
-                    createUser(id, socialId)
+//                    Toast.makeText(this@LoginActivity, "회원가입 시도", Toast.LENGTH_SHORT).show()
+                    createUser(id, name, socialId)
                 }
             }
             override fun onFailure(call: Call<User>, t: Throwable) {
@@ -278,26 +272,29 @@ class LoginActivity : AppCompatActivity() {
         })
     }
 
-    private fun createUser(id: String, socialId: Int){
+    // 회원가입
+    private fun createUser(id: String, name: String, socialId: Int){
         val input = User()
         input.id  = 0
         input.userId = id
         input.socialId = socialId
-        input.userName = "테스트" // 추후 입력창 제작
+        input.userName = name
+
+        Log.i("Create-User", "User Info : " + input)
 
         RetrofitUtil.userUtil.addUser(input).enqueue(object : retrofit2.Callback<User> {
             override fun onResponse(call: Call<User>, response: Response<User>) {
-                val value = response.body()
+                val value = response.body()!!
 
-                if(value != null) {
-                    Toast.makeText(this@LoginActivity, "회원가입 성공", Toast.LENGTH_SHORT).show()
+                if(value.id != null) {
+//                    Toast.makeText(this@LoginActivity, "회원가입 성공", Toast.LENGTH_SHORT).show()
                     val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                    intent.putExtra("user", value)
                     startActivity(intent)
                     finish()
                 }
                 else {
-                    Toast.makeText(this@LoginActivity, response.message(), Toast.LENGTH_SHORT).show()
-
+                    Toast.makeText(this@LoginActivity, "회원가입 문제 발생", Toast.LENGTH_SHORT).show()
                 }
 
             }

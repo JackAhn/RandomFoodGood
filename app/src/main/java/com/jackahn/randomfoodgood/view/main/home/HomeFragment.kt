@@ -18,7 +18,7 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.jackahn.randomfoodgood.dao.OnDataPass
+import com.jackahn.randomfoodgood.dto.OnDataPass
 import com.jackahn.randomfoodgood.dao.PlaceResult
 import com.jackahn.randomfoodgood.dao.ResultSearchKeyword
 import com.jackahn.randomfoodgood.databinding.FragmentHomeBinding

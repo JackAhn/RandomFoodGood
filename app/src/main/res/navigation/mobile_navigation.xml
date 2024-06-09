@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/navigation_notifications"
-        android:name="com.jackahn.randomfoodgood.view.main.notifications.NotificationsFragment"
+        android:name="com.jackahn.randomfoodgood.view.main.mypage.MypageFragment"
         android:label="@string/title_mypage"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_mypage" />
 </navigation>
